@@ -1,0 +1,4 @@
+#1.The attached file is the source of truth. Read it fully, follow it strictly, and generate the output exactly as per the guidelines in the file. Do not make assumptions or add anything outside the file unless explicitly asked.
+*#2.Add reference file and ask explain -
+    a."explain"
+    b."can you follow this and generate the output as per requirement in a different folder".
