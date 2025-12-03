@@ -17,6 +17,7 @@ public static class InfrastructureServiceExtensions
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
         
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         return services;

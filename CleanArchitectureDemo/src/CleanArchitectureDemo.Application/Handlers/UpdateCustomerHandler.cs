@@ -1,7 +1,6 @@
 using AutoMapper;
 using CleanArchitectureDemo.Application.Commands;
 using CleanArchitectureDemo.Application.DTOs;
-using CleanArchitectureDemo.Domain.Entities;
 using CleanArchitectureDemo.Domain.Interfaces;
 using CleanArchitectureDemo.Domain.ValueObjects;
 using MediatR;
@@ -10,20 +9,18 @@ namespace CleanArchitectureDemo.Application.Handlers;
 
 public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerCommand, CustomerDto>
 {
-    private readonly IRepository<Customer> _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public UpdateCustomerHandler(IRepository<Customer> repository, IUnitOfWork unitOfWork, IMapper mapper)
+    public UpdateCustomerHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _repository = repository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
     public async Task<CustomerDto> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
     {
-        var customer = await _repository.GetByIdAsync(request.Id, cancellationToken);
+        var customer = await _unitOfWork.Customers.GetByIdAsync(request.Id, cancellationToken);
         if (customer == null)
             throw new ArgumentException("Customer not found");
 

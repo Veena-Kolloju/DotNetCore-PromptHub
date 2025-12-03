@@ -1,5 +1,7 @@
 using CleanArchitectureDemo.Domain.Entities;
+using CleanArchitectureDemo.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace CleanArchitectureDemo.Infrastructure.Data;
 
@@ -13,12 +15,7 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Customer>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Phone).IsRequired().HasMaxLength(20);
-        });
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        base.OnModelCreating(modelBuilder);
     }
 }
