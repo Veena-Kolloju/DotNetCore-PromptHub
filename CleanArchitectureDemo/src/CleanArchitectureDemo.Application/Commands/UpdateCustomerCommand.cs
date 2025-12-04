@@ -1,3 +1,4 @@
+using CleanArchitectureDemo.Application.Common;
 using CleanArchitectureDemo.Application.DTOs;
 using MediatR;
 
@@ -7,4 +8,4 @@ public record UpdateCustomerCommand(
     Guid Id,
     string Name,
     string Email,
-    string Phone) : IRequest<CustomerDto>;
+    string Phone) : IRequest<Result<CustomerDto>>;

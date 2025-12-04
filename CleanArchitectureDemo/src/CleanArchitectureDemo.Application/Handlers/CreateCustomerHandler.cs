@@ -1,5 +1,6 @@
 using AutoMapper;
 using CleanArchitectureDemo.Application.Commands;
+using CleanArchitectureDemo.Application.Common;
 using CleanArchitectureDemo.Application.DTOs;
 using CleanArchitectureDemo.Domain.Entities;
 using CleanArchitectureDemo.Domain.Interfaces;
@@ -8,7 +9,7 @@ using MediatR;
 
 namespace CleanArchitectureDemo.Application.Handlers;
 
-public class CreateCustomerHandler : IRequestHandler<CreateCustomerCommand, CustomerDto>
+public class CreateCustomerHandler : IRequestHandler<CreateCustomerCommand, Result<CustomerDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -19,8 +20,12 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerCommand, Cust
         _mapper = mapper;
     }
 
-    public async Task<CustomerDto> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CustomerDto>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
+        var existingCustomer = await _unitOfWork.Customers.GetByEmailAsync(request.Email, cancellationToken);
+        if (existingCustomer != null)
+            return Result<CustomerDto>.Failure("Customer with this email already exists");
+
         var email = new Email(request.Email);
         var phone = new PhoneNumber(request.Phone);
         var customer = new Customer(request.Name, email, phone);
@@ -28,6 +33,7 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerCommand, Cust
         await _unitOfWork.Customers.AddAsync(customer, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return _mapper.Map<CustomerDto>(customer);
+        var customerDto = _mapper.Map<CustomerDto>(customer);
+        return Result<CustomerDto>.Success(customerDto);
     }
 }

@@ -19,14 +19,33 @@ public class CustomersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var customer = await _mediator.Send(new GetCustomerByIdQuery(id), cancellationToken);
-        return customer == null ? NotFound() : Ok(customer);
+        var result = await _mediator.Send(new GetCustomerByIdQuery(id), cancellationToken);
+        return result.IsSuccess ? Ok(result.Data) : NotFound(result.ErrorMessage);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCustomerCommand command, CancellationToken cancellationToken)
     {
-        var customer = await _mediator.Send(command, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = customer.Id }, customer);
+        var result = await _mediator.Send(command, cancellationToken);
+        return result.IsSuccess 
+            ? CreatedAtAction(nameof(GetById), new { id = result.Data.Id }, result.Data)
+            : BadRequest(result.ErrorMessage);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCustomerCommand command, CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+            return BadRequest("ID mismatch");
+            
+        var result = await _mediator.Send(command, cancellationToken);
+        return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Search([FromQuery] SearchCustomersQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
     }
 }
